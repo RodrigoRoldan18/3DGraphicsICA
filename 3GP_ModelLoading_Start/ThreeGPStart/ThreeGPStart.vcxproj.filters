@@ -48,6 +48,9 @@
     <ClCompile Include="Simulation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Shaders\fragment_shader.glsl">
@@ -78,6 +81,9 @@
     </ClInclude>
     <ClInclude Include="ExternalLibraryHeaders.h">
       <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -6,6 +6,14 @@
 #include "Mesh.h"
 #include "Camera.h"
 
+class Terrain;
+
+struct myMesh
+{
+	GLuint VAO;
+	Helpers::Mesh mesh;
+};
+
 class Renderer
 {
 private:
@@ -20,14 +28,8 @@ private:
 
 	bool CreateProgram();
 
-	//--------------------------------------------------
-	std::vector<glm::vec3> terrainVertices;
-	std::vector<GLuint> terrainElements;
-	std::vector<glm::vec2> terrainTexCoor;
-	std::vector<glm::vec3> terrainNormals;
-	int numCells;
-	GLuint terrainTex{ 0 };
-	//--------------------------------------------------
+	std::vector<myMesh*> meshVector;
+	Terrain* myTerrain;
 
 public:
 	Renderer()=default;
@@ -39,6 +41,6 @@ public:
 	// Render the scene
 	void Render(const Helpers::Camera& camera, float deltaTime);
 
-	void CreateTerrainElements(const int& numVertsX);
+	void GenBuffers(const Helpers::Mesh& mesh);
 };
 
