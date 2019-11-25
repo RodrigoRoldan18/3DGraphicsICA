@@ -19,6 +19,16 @@ private:
 	GLuint m_numElements{ 0 };
 
 	bool CreateProgram();
+
+	//--------------------------------------------------
+	std::vector<glm::vec3> terrainVertices;
+	std::vector<GLuint> terrainElements;
+	std::vector<glm::vec2> terrainTexCoor;
+	std::vector<glm::vec3> terrainNormals;
+	int numCells;
+	GLuint terrainTex{ 0 };
+	//--------------------------------------------------
+
 public:
 	Renderer()=default;
 	~Renderer();
@@ -28,5 +38,7 @@ public:
 
 	// Render the scene
 	void Render(const Helpers::Camera& camera, float deltaTime);
+
+	void CreateTerrainElements(const int& numVertsX);
 };
 
