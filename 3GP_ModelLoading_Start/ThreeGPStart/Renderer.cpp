@@ -56,19 +56,13 @@ bool Renderer::InitialiseGeometry()
 		return false;
 
 	myTerrain = new Terrain();
-	myTerrain->CreateTerrain(100, 10.0f, 10.0f, "Data\\Textures\\grass11.bmp");
-	GenBuffers(myTerrain->GetMesh());
+	myTerrain->CreateTerrain(100, 10.0f, 10.0f, "Data\\Textures\\curvy.gif");
+	GenBuffers(myTerrain->GetMesh(), "Data\\Textures\\grass11.bmp");
 
 	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
 	{
-		GenBuffers(mesh);
+		GenBuffers(mesh, "Data\\Models\\Jeep\\jeep_army.jpg");
 	}
-
-	// Good idea to check for an error now:	
-	Helpers::CheckForGLError();
-
-	// Clear VAO binding
-	glBindVertexArray(0);
 
 	return true;
 }
@@ -104,28 +98,33 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	GLuint combined_xform_id = glGetUniformLocation(m_program, "combined_xform");
 	glUniformMatrix4fv(combined_xform_id, 1, GL_FALSE, glm::value_ptr(combined_xform));
 
-	//Adding textures into GLSL	
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, myTerrain->GetTerrainTex());
-	glUniform1i(glGetUniformLocation(m_program, "sampler_tex"), 0);
-
 	// TODO: render each mesh. Send the correct model matrix to the shader in a uniform
 	glm::mat4 model_xform = glm::mat4(1);
 	GLuint model_xform_id = glGetUniformLocation(m_program, "model_xform");
 	glUniformMatrix4fv(model_xform_id, 1, GL_FALSE, glm::value_ptr(model_xform));
 
-	// Bind our VAO and render
-	for (myMesh* m : meshVector)	//THERE IS A PROBLEM IN HERE WITH THE MESHVECTOR
+	//IF Terrain, use also this texture for the heightmap
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, myTerrain->GetHeightmap());
+	//glUniform1i(glGetUniformLocation(m_program, "heightmap_tex"), 0);
+
+	for (auto& m : meshVector)
 	{
+		// Bind our VAO and render	
+		//Adding textures into GLSL	
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m->texture);
+		glUniform1i(glGetUniformLocation(m_program, "sampler_tex"), 0);
+
 		glBindVertexArray(m->VAO);
-		glDrawElements(GL_TRIANGLES, m->mesh.elements.size(), GL_UNSIGNED_INT, (void*)0);
-	}
+		glDrawElements(GL_TRIANGLES, m->numElements, GL_UNSIGNED_INT, (void*)0);
+	}	
 
 	// Always a good idea, when debugging at least, to check for GL errors
 	Helpers::CheckForGLError();
 }
 
-void Renderer::GenBuffers(const Helpers::Mesh& mesh)
+void Renderer::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName)
 {
 	myMesh* temp = new myMesh();
 	GLuint positionsVBO;
@@ -142,15 +141,17 @@ void Renderer::GenBuffers(const Helpers::Mesh& mesh)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * mesh.normals.size(), mesh.normals.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	glGenBuffers(1, &texVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, texVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * mesh.uvCoords.size(), mesh.uvCoords.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	glGenBuffers(1, &elementsEBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh.elements.size(), mesh.elements.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	glGenBuffers(1, &texVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, texVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * mesh.uvCoords.size(), mesh.uvCoords.data(), GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	temp->numElements = mesh.elements.size();
 
 	glGenVertexArrays(1, &temp->VAO);
 	glBindVertexArray(temp->VAO);
@@ -189,6 +190,26 @@ void Renderer::GenBuffers(const Helpers::Mesh& mesh)
 	);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsEBO);
+
+	// Good idea to check for an error now:	
+	Helpers::CheckForGLError();
+
+	// Clear VAO binding
+	glBindVertexArray(0);
+
+	Helpers::ImageLoader imgLoader;
+	if (!imgLoader.Load(texFileName))
+		return;
+
+	glGenTextures(1, &temp->texture);
+	glBindTexture(GL_TEXTURE_2D, temp->texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgLoader.Width(), imgLoader.Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgLoader.GetData());
+	glGenerateMipmap(GL_TEXTURE_2D);
+
 	temp->mesh = mesh;
 	meshVector.push_back(temp);
 }

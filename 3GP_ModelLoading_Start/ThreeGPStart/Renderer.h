@@ -11,7 +11,9 @@ class Terrain;
 struct myMesh
 {
 	GLuint VAO;
+	GLuint texture;
 	Helpers::Mesh mesh;
+	unsigned int numElements;
 };
 
 class Renderer
@@ -41,6 +43,6 @@ public:
 	// Render the scene
 	void Render(const Helpers::Camera& camera, float deltaTime);
 
-	void GenBuffers(const Helpers::Mesh& mesh);
+	void GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName);
 };
 

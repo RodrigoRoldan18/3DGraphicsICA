@@ -1,7 +1,7 @@
 #include "Terrain.h"
 #include "ImageLoader.h"
 
-void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std::string argTexFilename)
+void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std::string argHeightmap)
 {
 	numCells = argNumCells;
 	numCellsX = numCells + 1;
@@ -9,15 +9,14 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 	sizeX = argSizeX;
 	sizeZ = argSizeZ;
 	myMesh = new Helpers::Mesh();
-	myMesh->name = argTexFilename;
 
 	///Create the vertices
 	for (int cellZ = 0; cellZ < numCellsZ; cellZ++)
 	{
 		for (int cellX = 0; cellX < numCellsX; cellX++)
 		{
-			myMesh->vertices.push_back({ cellX * sizeX, rand() % ((int)sizeX) - (int)sizeX / 2, -cellZ * sizeZ });
-			//terrainVertices.push_back({ cellX * sizeX, 0.0f, -cellZ * sizeZ });
+			//myMesh->vertices.push_back({ cellX * sizeX, rand() % ((int)sizeX) - (int)sizeX / 2, -cellZ * sizeZ });
+			myMesh->vertices.push_back({ cellX * sizeX, 0.0f, -cellZ * sizeZ });
 		}
 	}
 	///Create the texture coordinates
@@ -34,7 +33,6 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 	//-------------------------------------------
 	for (int cellZ = 0; cellZ < numCells; cellZ++)
 	{
-		//doDiamondPattern = !doDiamondPattern;
 		for (int cellX = 0; cellX < numCells; cellX++)
 		{
 			int startVertIndex = cellZ * numCellsX + cellX;
@@ -71,31 +69,31 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 	{
 		v = { 0.0f, 0.0f, 0.0f };
 	}
-	//int countNormals = 0;
-	//for (int i = 0; i < terrainElements.size(); i+=3)
-	//{
-	//	glm::vec3 p1 = terrainVertices[terrainElements[i]];
-	//	glm::vec3 p2 = terrainVertices[terrainElements[i + 1]];
-	//	glm::vec3 p3 = terrainVertices[terrainElements[i + 2]];
+	for (GLuint i = 0; i < myMesh->elements.size(); i+=3)
+	{
+		glm::vec3 p1 = myMesh->vertices[myMesh->elements[i]];
+		glm::vec3 p2 = myMesh->vertices[myMesh->elements[i + 1]];
+		glm::vec3 p3 = myMesh->vertices[myMesh->elements[i + 2]];
 
-	//	glm::vec3 edge1 = p2 - p1;
-	//	glm::vec3 edge2 = p3 - p1;
-	//	glm::vec3 normal = glm::cross(edge1, edge2);
+		glm::vec3 edge1 = p2 - p1;
+		glm::vec3 edge2 = p3 - p1;
+		glm::vec3 normal = glm::cross(edge1, edge2);
 
-	//	terrainNormals[countNormals] += normal;
-	//	countNormals++;
-	//}
-	//for (auto& normal : terrainNormals)	//do this AFTER you have moved displaced your verts using the heightmap
-	//{
-	//	glm::normalize(normal);
-	//}
-
+		myMesh->normals[myMesh->elements[i]] += normal;
+		myMesh->normals[myMesh->elements[i + 1]] += normal;
+		myMesh->normals[myMesh->elements[i + 2]] += normal;
+	}
+	for (auto& normal : myMesh->normals)
+	{
+		glm::normalize(normal);
+	}
+	///Load the heightmap
 	Helpers::ImageLoader imgLoader;
-	if (!imgLoader.Load("Data\\Textures\\grass11.bmp"))
+	if (!imgLoader.Load(argHeightmap))
 		return;
 
-	glGenTextures(1, &terrainTex);
-	glBindTexture(GL_TEXTURE_2D, terrainTex);
+	glGenTextures(1, &heightmap);
+	glBindTexture(GL_TEXTURE_2D, heightmap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
