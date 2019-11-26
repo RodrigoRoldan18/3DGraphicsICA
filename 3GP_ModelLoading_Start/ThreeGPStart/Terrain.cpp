@@ -92,6 +92,25 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 	if (!imgLoader.Load(argHeightmap))
 		return;
 
+	vertexXtoImage = (float)imgLoader.Width() / numCellsX;
+	vertexZtoImage = (float)imgLoader.Height() / numCellsZ;
+
+	imageData = imgLoader.GetData();
+
+	for (int x = 0; x < numCellsX; x++)
+	{
+		for (int z = 0; z < numCellsZ; z++)
+		{
+			int imageX = vertexXtoImage * x;
+			int imageZ = vertexZtoImage * z;
+
+			size_t offset = ((size_t)imageX + (size_t)imageZ * imgLoader.Width()) * 4;
+			BYTE height = imageData[offset];
+
+			myMesh->vertices[x].y = (float)height;// * scaling;
+		}
+	}
+
 	glGenTextures(1, &heightmap);
 	glBindTexture(GL_TEXTURE_2D, heightmap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

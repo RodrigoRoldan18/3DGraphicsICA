@@ -111,11 +111,13 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	for (auto& m : meshVector)
 	{
 		// Bind our VAO and render	
-		//Adding textures into GLSL	
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m->texture);
-		glUniform1i(glGetUniformLocation(m_program, "sampler_tex"), 0);
-
+		for (auto& texture : m->texture)
+		{
+			//Adding textures into GLSL	
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture);
+			glUniform1i(glGetUniformLocation(m_program, "sampler_tex"), 0);
+		}
 		glBindVertexArray(m->VAO);
 		glDrawElements(GL_TRIANGLES, m->numElements, GL_UNSIGNED_INT, (void*)0);
 	}	
@@ -131,6 +133,7 @@ void Renderer::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileN
 	GLuint normalsVBO;
 	GLuint texVBO;
 	GLuint elementsEBO;
+	GLuint tempTexture;
 	glGenBuffers(1, &positionsVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, positionsVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * mesh.vertices.size(), mesh.vertices.data(), GL_STATIC_DRAW);
@@ -201,8 +204,8 @@ void Renderer::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileN
 	if (!imgLoader.Load(texFileName))
 		return;
 
-	glGenTextures(1, &temp->texture);
-	glBindTexture(GL_TEXTURE_2D, temp->texture);
+	glGenTextures(1, &tempTexture);
+	glBindTexture(GL_TEXTURE_2D, tempTexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -210,6 +213,7 @@ void Renderer::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileN
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgLoader.Width(), imgLoader.Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgLoader.GetData());
 	glGenerateMipmap(GL_TEXTURE_2D);
 
+	temp->texture.push_back(tempTexture);
 	temp->mesh = mesh;
 	meshVector.push_back(temp);
 }

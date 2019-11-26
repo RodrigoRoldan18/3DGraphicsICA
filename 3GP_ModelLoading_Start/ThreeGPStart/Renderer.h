@@ -11,7 +11,7 @@ class Terrain;
 struct myMesh
 {
 	GLuint VAO;
-	GLuint texture;
+	std::vector<GLuint> texture;
 	Helpers::Mesh mesh;
 	unsigned int numElements;
 };

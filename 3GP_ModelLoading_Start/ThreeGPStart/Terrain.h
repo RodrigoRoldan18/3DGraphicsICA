@@ -9,7 +9,10 @@ private:
 	int numCells, numCellsX, numCellsZ;
 	float sizeX, sizeZ;
 	Helpers::Mesh* myMesh;
+
 	GLuint heightmap;
+	float vertexXtoImage, vertexZtoImage;
+	GLbyte* imageData;
 
 public:
 	Terrain() {};
