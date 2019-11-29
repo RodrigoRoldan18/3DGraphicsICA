@@ -51,18 +51,53 @@ bool Renderer::InitialiseGeometry()
 		return false;
 
 	// TODO - load mesh using the Helpers::ModelLoader class
+	myTerrain = new Terrain();
+	myTerrain->CreateTerrain(256, 10.0f, 10.0f, "Data\\Textures\\curvy.gif");
+	GenBuffers(myTerrain->GetMesh(), "Data\\Textures\\grass11.bmp");
+
 	Helpers::ModelLoader modelLoader;
 	if (!modelLoader.LoadFromFile("Data\\Models\\Jeep\\jeep.obj"))
 		return false;
-
-	myTerrain = new Terrain();
-	myTerrain->CreateTerrain(100, 10.0f, 10.0f, "Data\\Textures\\curvy.gif");
-	GenBuffers(myTerrain->GetMesh(), "Data\\Textures\\grass11.bmp");
-
 	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
 	{
 		GenBuffers(mesh, "Data\\Models\\Jeep\\jeep_army.jpg");
 	}
+	/*if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\gun.obj"))
+		return false;
+	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
+	{
+		GenBuffers(mesh, "Data\\Models\\AquaPig\\aqua_pig_2k.png");
+	}
+	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\gun_base.obj"))
+		return false;
+	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
+	{
+		GenBuffers(mesh, "Data\\Models\\AquaPig\\aqua_pig_2k.png");
+	}
+	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\hull.obj"))
+		return false;
+	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
+	{
+		GenBuffers(mesh, "Data\\Models\\AquaPig\\aqua_pig_2k.png");
+	}
+	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\propeller.obj"))
+		return false;
+	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
+	{
+		GenBuffers(mesh, "Data\\Models\\AquaPig\\aqua_pig_2k.png");
+	}
+	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\wing_left.obj"))
+		return false;
+	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
+	{
+		GenBuffers(mesh, "Data\\Models\\AquaPig\\aqua_pig_2k.png");
+	}
+	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\wing_right.obj"))
+		return false;
+	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
+	{
+		GenBuffers(mesh, "Data\\Models\\AquaPig\\aqua_pig_2k.png");
+	}*/
 
 	return true;
 }

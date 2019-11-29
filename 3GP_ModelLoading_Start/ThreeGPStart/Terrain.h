@@ -12,7 +12,7 @@ private:
 
 	GLuint heightmap;
 	float vertexXtoImage, vertexZtoImage;
-	GLbyte* imageData;
+	GLubyte* imageData;
 
 public:
 	Terrain() {};
