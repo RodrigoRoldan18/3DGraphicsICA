@@ -4,10 +4,8 @@
 void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std::string argHeightmap)
 {
 	numCells = argNumCells;
-	numCellsX = numCells;
-	numCellsZ = numCells;
-	int numVertsX = numCellsX + 1;
-	int numVertsZ = numCellsZ + 1;
+	numCellsX = numCells + 1;
+	numCellsZ = numCells + 1;
 	sizeX = argSizeX;
 	sizeZ = argSizeZ;
 	myMesh = new Helpers::Mesh();
@@ -21,15 +19,17 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 	vertexXtoImage = (float)imgLoader.Width() / numCellsX;
 	vertexZtoImage = (float)imgLoader.Height() / numCellsZ;
 
-	imageData = (GLubyte*)imgLoader.GetData();
-	for (int cellZ = 0; cellZ < numVertsZ; cellZ++)
+	imageData = imgLoader.GetData();
+	for (int cellZ = 0; cellZ < numCellsZ; cellZ++)
 	{
-		for (int cellX = 0; cellX < numVertsX; cellX++)
+		for (int cellX = 0; cellX < numCellsX; cellX++)
 		{
-			heightmap = imageData[0];
-			myMesh->vertices.push_back({ cellX * sizeX, heightmap, -cellZ * sizeZ });
-			//myMesh->vertices.push_back({ cellX * sizeX, 0.0f, -cellZ * sizeZ });
-			imageData += 4;
+			int imageX = vertexXtoImage * cellX;
+			int imageZ = vertexZtoImage * cellZ;
+
+			size_t offset = ((size_t)imageX + (size_t)imageZ * imgLoader.Width()) * 4;
+			BYTE height = imageData[offset];
+			myMesh->vertices.push_back({ cellX * sizeX, (float)height, -cellZ * sizeZ });
 			///Create the texture coordinates
 			myMesh->uvCoords.push_back({ (float)cellX * sizeX / numCellsX, (float)cellZ * sizeZ / numCellsZ });
 			///Create the normals
@@ -40,9 +40,9 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 	//-------------------------------------------
 	bool doDiamondPattern = true;
 	//-------------------------------------------
-	for (int cellZ = 0; cellZ < numCellsZ; cellZ++)
+	for (int cellZ = 0; cellZ < numCells; cellZ++)
 	{
-		for (int cellX = 0; cellX < numCellsX; cellX++)
+		for (int cellX = 0; cellX < numCells; cellX++)
 		{
 			int startVertIndex = cellZ * numCellsX + cellX;
 			if (doDiamondPattern)
@@ -72,6 +72,7 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 			doDiamondPattern = !doDiamondPattern;
 		}
 	}	
+	///Create the normals
 	for (GLuint i = 0; i < myMesh->elements.size(); i+=3)
 	{
 		glm::vec3 p1 = myMesh->vertices[myMesh->elements[i]];
@@ -90,14 +91,4 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 	{
 		glm::normalize(normal);
 	}
-
-	/*glGenTextures(1, &heightmap);
-	glBindTexture(GL_TEXTURE_2D, heightmap);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgLoader.Width(), imgLoader.Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgLoader.GetData());
-	glGenerateMipmap(GL_TEXTURE_2D);*/
-
 }

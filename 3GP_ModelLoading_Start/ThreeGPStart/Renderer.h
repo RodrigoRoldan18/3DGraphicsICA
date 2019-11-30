@@ -11,7 +11,7 @@ class Terrain;
 struct myMesh
 {
 	GLuint VAO;
-	std::vector<GLuint> texture;
+	GLuint texture;
 	Helpers::Mesh mesh;
 	unsigned int numElements;
 };
@@ -32,6 +32,8 @@ private:
 
 	std::vector<myMesh*> meshVector;
 	Terrain* myTerrain;
+	GLuint skyboxVAO;
+	int skyboxVertSize;
 
 public:
 	Renderer()=default;
@@ -43,6 +45,7 @@ public:
 	// Render the scene
 	void Render(const Helpers::Camera& camera, float deltaTime);
 
-	void GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName);
+	void GenBuffers(const Helpers::Mesh& mesh, const std::vector<std::string>& texFileName);
+	GLuint loadCubemap(const std::vector<std::string>& faces);
 };
 

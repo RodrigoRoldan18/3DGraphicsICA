@@ -53,50 +53,67 @@ bool Renderer::InitialiseGeometry()
 	// TODO - load mesh using the Helpers::ModelLoader class
 	myTerrain = new Terrain();
 	myTerrain->CreateTerrain(256, 10.0f, 10.0f, "Data\\Textures\\curvy.gif");
-	GenBuffers(myTerrain->GetMesh(), "Data\\Textures\\grass11.bmp");
+	GenBuffers(myTerrain->GetMesh(), { "Data\\Textures\\grass11.bmp" });
 
 	Helpers::ModelLoader modelLoader;
 	if (!modelLoader.LoadFromFile("Data\\Models\\Jeep\\jeep.obj"))
 		return false;
 	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
 	{
-		GenBuffers(mesh, "Data\\Models\\Jeep\\jeep_army.jpg");
+		GenBuffers(mesh, { "Data\\Models\\Jeep\\jeep_rood.jpg" });
 	}
+
+	//std::vector<std::string> faces =
+	//{
+	//	"Data\\Sky\\Clouds\\SkyBox_Right.tga",
+	//	"Data\\Sky\\Clouds\\SkyBox_Left.tga",
+	//	"Data\\Sky\\Clouds\\SkyBox_Top.tga",
+	//	"Data\\Sky\\Clouds\\SkyBox_Bottom.tga",
+	//	"Data\\Sky\\Clouds\\SkyBox_Front.tga",
+	//	"Data\\Sky\\Clouds\\SkyBox_Back.tga",
+	//};
+	//if (!modelLoader.LoadFromFile("Data\\Sky\\Clouds\\skybox.x"))
+	//	return false;
+	//for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
+	//{
+	//	GenBuffers(mesh, faces);
+	//}
+	
 	/*if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\gun.obj"))
 		return false;
 	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
 	{
-		GenBuffers(mesh, "Data\\Models\\AquaPig\\aqua_pig_2k.png");
+		GenBuffers(mesh, { "Data\\Models\\AquaPig\\aqua_pig_1K.png" });
 	}
 	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\gun_base.obj"))
 		return false;
 	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
 	{
-		GenBuffers(mesh, "Data\\Models\\AquaPig\\aqua_pig_2k.png");
+		GenBuffers(mesh, {"Data\\Models\\AquaPig\\aqua_pig_1K.png"});
 	}
 	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\hull.obj"))
 		return false;
 	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
 	{
-		GenBuffers(mesh, "Data\\Models\\AquaPig\\aqua_pig_2k.png");
+		GenBuffers(mesh, { "Data\\Models\\AquaPig\\aqua_pig_1K.png" });
 	}
 	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\propeller.obj"))
 		return false;
 	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
 	{
-		GenBuffers(mesh, "Data\\Models\\AquaPig\\aqua_pig_2k.png");
+		GenBuffers(mesh, { "Data\\Models\\AquaPig\\aqua_pig_1K.png" });
 	}
 	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\wing_left.obj"))
 		return false;
 	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
 	{
-		GenBuffers(mesh, "Data\\Models\\AquaPig\\aqua_pig_2k.png");
+		GenBuffers(mesh, { "Data\\Models\\AquaPig\\aqua_pig_1K.png" });
 	}
 	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\wing_right.obj"))
 		return false;
 	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
 	{
-		GenBuffers(mesh, "Data\\Models\\AquaPig\\aqua_pig_2k.png");
+		GenBuffers(mesh, { "Data\\Models\\AquaPig\\aqua_pig_1K.png" });
 	}*/
 
 	return true;
@@ -138,21 +155,15 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	GLuint model_xform_id = glGetUniformLocation(m_program, "model_xform");
 	glUniformMatrix4fv(model_xform_id, 1, GL_FALSE, glm::value_ptr(model_xform));
 
-	//IF Terrain, use also this texture for the heightmap
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, myTerrain->GetHeightmap());
-	//glUniform1i(glGetUniformLocation(m_program, "heightmap_tex"), 0);
-
 	for (auto& m : meshVector)
 	{
 		// Bind our VAO and render	
-		for (auto& texture : m->texture)
-		{
-			//Adding textures into GLSL	
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, texture);
-			glUniform1i(glGetUniformLocation(m_program, "sampler_tex"), 0);
-		}
+		
+		//Adding textures into GLSL	
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m->texture);
+		glUniform1i(glGetUniformLocation(m_program, "sampler_tex"), 0);
+		
 		glBindVertexArray(m->VAO);
 		glDrawElements(GL_TRIANGLES, m->numElements, GL_UNSIGNED_INT, (void*)0);
 	}	
@@ -161,7 +172,7 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	Helpers::CheckForGLError();
 }
 
-void Renderer::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName)
+void Renderer::GenBuffers(const Helpers::Mesh& mesh, const std::vector<std::string>& texFileName)
 {
 	myMesh* temp = new myMesh();
 	GLuint positionsVBO;
@@ -235,20 +246,60 @@ void Renderer::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileN
 	// Clear VAO binding
 	glBindVertexArray(0);
 
-	Helpers::ImageLoader imgLoader;
-	if (!imgLoader.Load(texFileName))
-		return;
+	if (texFileName.size() == 1)
+	{
+		for (std::string filePath : texFileName)
+		{
+			Helpers::ImageLoader imgLoader;
+			if (!imgLoader.Load(filePath))
+				return;
 
-	glGenTextures(1, &tempTexture);
-	glBindTexture(GL_TEXTURE_2D, tempTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgLoader.Width(), imgLoader.Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgLoader.GetData());
-	glGenerateMipmap(GL_TEXTURE_2D);
+			glGenTextures(1, &tempTexture);
+			glBindTexture(GL_TEXTURE_2D, tempTexture);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgLoader.Width(), imgLoader.Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgLoader.GetData());
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+	}
+	else
+	{
+		tempTexture = loadCubemap(texFileName);
+	}
 
-	temp->texture.push_back(tempTexture);
+	temp->texture = tempTexture;
 	temp->mesh = mesh;
 	meshVector.push_back(temp);
+}
+
+GLuint Renderer::loadCubemap(const std::vector<std::string>& faces)
+{
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	int width, height, nrChannels;
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		Helpers::ImageLoader imgLoader;
+		if (imgLoader.Load(faces[i]))
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, imgLoader.Width(), imgLoader.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, imgLoader.GetData());
+			//stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+			//stbi_image_free(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	return textureID;
 }
