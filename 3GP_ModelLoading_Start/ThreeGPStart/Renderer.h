@@ -7,6 +7,7 @@
 #include "Camera.h"
 
 class Terrain;
+class Skybox;
 
 struct myMesh
 {
@@ -31,9 +32,8 @@ private:
 	bool CreateProgram();
 
 	std::vector<myMesh*> meshVector;
-	Terrain* myTerrain;
-	GLuint skyboxVAO;
-	int skyboxVertSize;
+	myMesh* skybox;
+	Skybox* mySkybox;
 
 public:
 	Renderer()=default;
@@ -46,6 +46,7 @@ public:
 	void Render(const Helpers::Camera& camera, float deltaTime);
 
 	void GenBuffers(const Helpers::Mesh& mesh, const std::vector<std::string>& texFileName);
+	void GenSkyboxBuff(const Helpers::Mesh& mesh);
 	GLuint loadCubemap(const std::vector<std::string>& faces);
 };
 
