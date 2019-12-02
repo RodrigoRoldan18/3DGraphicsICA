@@ -7,13 +7,16 @@
 Renderer::~Renderer()
 {
 	glDeleteProgram(m_program);	
-	glDeleteBuffers(1, &m_VAO);
-	for (auto& m : meshVector)
+	//glDeleteBuffers(1, &m_VAO);
+	/*for (auto& m : meshVector)
 	{
 		delete m;
 	}
-	delete skybox;
-	delete mySkybox;
+	for (auto& s : skyboxVector)
+	{
+		delete s;
+	}*/
+	//delete mySkybox;
 }
 
 // Load, compile and link the shaders and create a program object to host them
@@ -57,25 +60,27 @@ bool Renderer::InitialiseGeometry()
 		return false;
 
 	// TODO - load mesh using the Helpers::ModelLoader class
+
+	//mySkybox = new Skybox();
+	Helpers::ModelLoader skyboxLoader;
+	if (!skyboxLoader.LoadFromFile("Data\\Sky\\Clouds\\skybox.x"))
+		return false;
+	for (const Helpers::Mesh& mesh : skyboxLoader.GetMeshVector())
+	{
+		skyboxVector.push_back(GenBuffers(mesh, "Data\\Sky\\Clouds\\SkyBox_Front.tga"));
+	}
+
 	Terrain* myTerrain = new Terrain();
 	myTerrain->CreateTerrain(256, 10.0f, 10.0f, "Data\\Textures\\curvy.gif");
-	GenBuffers(myTerrain->GetMesh(), { "Data\\Textures\\grass11.bmp" });
+	meshVector.push_back(GenBuffers(myTerrain->GetMesh(), "Data\\Textures\\grass11.bmp"));
 
-	Helpers::ModelLoader modelLoader;
-	if (!modelLoader.LoadFromFile("Data\\Models\\Jeep\\jeep.obj"))
+	Helpers::ModelLoader jeepLoader;
+	if (!jeepLoader.LoadFromFile("Data\\Models\\Jeep\\jeep.obj"))
 		return false;
-	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
+	for (const Helpers::Mesh& mesh : jeepLoader.GetMeshVector())
 	{
-		GenBuffers(mesh, { "Data\\Models\\Jeep\\jeep_rood.jpg" });
+		meshVector.push_back(GenBuffers(mesh, "Data\\Models\\Jeep\\jeep_rood.jpg"));
 	}	
-
-	mySkybox = new Skybox();
-	if (!modelLoader.LoadFromFile("Data\\Sky\\Clouds\\skybox.x"))
-		return false;
-	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
-	{
-		GenSkyboxBuff(mesh);
-	}
 	
 	/*if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\gun.obj"))
 		return false;
@@ -125,8 +130,9 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	glEnable(GL_CULL_FACE);
 
 	// Uncomment to render in wireframe (can be useful when debugging)
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
+//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
 	// Clear buffers from previous frame
 	glClearColor(0.0f, 0.0f, 0.0f, 0.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -135,11 +141,13 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	GLint viewportSize[4];
 	glGetIntegerv(GL_VIEWPORT, viewportSize);
 	const float aspect_ratio = viewportSize[2] / (float)viewportSize[3];
-	glm::mat4 projection_xform = glm::perspective(glm::radians(45.0f), aspect_ratio, 1.0f, 2000.0f);
+	glm::mat4 projection_xform = glm::perspective(glm::radians(45.0f), aspect_ratio, 0.1f, 2000.0f);
 
 	// TODO: Compute camera view matrix and combine with projection matrix for passing to shader
 	glm::mat4 view_xform = glm::lookAt(camera.GetPosition(), camera.GetPosition() + camera.GetLookVector(), camera.GetUpVector());
-	glm::mat4 combined_xform = projection_xform * view_xform;
+	glm::mat4 view_xform2 = glm::mat4(glm::mat3(view_xform));
+	glm::mat4 combined_xform = projection_xform * view_xform2;
+
 
 	// Use our program. Doing this enables the shaders we attached previously.
 	glUseProgram(m_program);
@@ -153,37 +161,50 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	GLuint model_xform_id = glGetUniformLocation(m_program, "model_xform");
 	glUniformMatrix4fv(model_xform_id, 1, GL_FALSE, glm::value_ptr(model_xform));
 
-	glDepthMask(GL_FALSE);
-	glBindVertexArray(skybox->VAO);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->texture);
-	glDrawArrays(GL_TRIANGLES, 0, skybox->numElements);
+	//Render the skybox
+	for (auto& s : skyboxVector)
+	{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, s.texture);
+			glUniform1i(glGetUniformLocation(m_program, "sampler_tex"), 0);
+
+			glBindVertexArray(s.VAO);
+			glDrawElements(GL_TRIANGLES, s.numElements, GL_UNSIGNED_INT, (void*)0);
+			// Always a good idea, when debugging at least, to check for GL errors
+			Helpers::CheckForGLError();
+
+	}	
+
 	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
+	combined_xform = projection_xform * view_xform;
+	combined_xform_id = glGetUniformLocation(m_program, "combined_xform");
+	glUniformMatrix4fv(combined_xform_id, 1, GL_FALSE, glm::value_ptr(combined_xform));
 
 	for (auto& m : meshVector)
 	{
-		// Bind our VAO and render	
+		// Bind our VAO and render
 		
 		//Adding textures into GLSL	
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m->texture);
+		glBindTexture(GL_TEXTURE_2D, m.texture);
 		glUniform1i(glGetUniformLocation(m_program, "sampler_tex"), 0);
 		
-		glBindVertexArray(m->VAO);
-		glDrawElements(GL_TRIANGLES, m->numElements, GL_UNSIGNED_INT, (void*)0);
+		glBindVertexArray(m.VAO);
+		glDrawElements(GL_TRIANGLES, m.numElements, GL_UNSIGNED_INT, (void*)0);
+		// Always a good idea, when debugging at least, to check for GL errors
+		Helpers::CheckForGLError();
 	}	
-
-	// Always a good idea, when debugging at least, to check for GL errors
-	Helpers::CheckForGLError();
 }
 
-void Renderer::GenBuffers(const Helpers::Mesh& mesh, const std::vector<std::string>& texFileName)
+myMesh Renderer::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName)
 {
-	myMesh* temp = new myMesh();
+	myMesh temp;
 	GLuint positionsVBO;
 	GLuint normalsVBO;
 	GLuint texVBO;
 	GLuint elementsEBO;
-	GLuint tempTexture;
+	GLuint tempTexture{0};
 	glGenBuffers(1, &positionsVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, positionsVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * mesh.vertices.size(), mesh.vertices.data(), GL_STATIC_DRAW);
@@ -204,10 +225,10 @@ void Renderer::GenBuffers(const Helpers::Mesh& mesh, const std::vector<std::stri
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh.elements.size(), mesh.elements.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	temp->numElements = mesh.elements.size();
+	temp.numElements = mesh.elements.size();
 
-	glGenVertexArrays(1, &temp->VAO);
-	glBindVertexArray(temp->VAO);
+	glGenVertexArrays(1, &temp.VAO);
+	glBindVertexArray(temp.VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, positionsVBO);
 	glEnableVertexAttribArray(0);
@@ -249,57 +270,23 @@ void Renderer::GenBuffers(const Helpers::Mesh& mesh, const std::vector<std::stri
 
 	// Clear VAO binding
 	glBindVertexArray(0);
-	for (std::string filePath : texFileName) 
-	{
-		Helpers::ImageLoader imgLoader;
-		if (!imgLoader.Load(filePath))
-			return;
+	
+	Helpers::ImageLoader imgLoader;
+	if (!imgLoader.Load(texFileName))
+		return myMesh();
 
-		glGenTextures(1, &tempTexture);
-		glBindTexture(GL_TEXTURE_2D, tempTexture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgLoader.Width(), imgLoader.Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgLoader.GetData());
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	temp->texture = tempTexture;
-	temp->mesh = mesh;
-	meshVector.push_back(temp);
-}
-
-void Renderer::GenSkyboxBuff(const Helpers::Mesh& mesh)
-{
-	skybox = new myMesh();
-	GLuint positionsVBO;
-	glGenBuffers(1, &positionsVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, positionsVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * mesh.vertices.size(), mesh.vertices.data(), GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenVertexArrays(1, &skybox->VAO);
-	glBindVertexArray(skybox->VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, positionsVBO);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(
-		0,
-		3,
-		GL_FLOAT,
-		GL_FALSE,
-		0,
-		(void*)0
-	);
-	// Good idea to check for an error now:	
-	Helpers::CheckForGLError();
-	// Clear VAO binding
-	glBindVertexArray(0);
-
-	GLuint temptexture = loadCubemap(mySkybox->GetFaces());
-	skybox->texture = temptexture;
-	skybox->mesh = mesh;
-	skybox->numElements = mesh.vertices.size();
+	glGenTextures(1, &tempTexture);
+	glBindTexture(GL_TEXTURE_2D, tempTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgLoader.Width(), imgLoader.Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgLoader.GetData());
+	glGenerateMipmap(GL_TEXTURE_2D);
+	
+	temp.texture = tempTexture;
+//	temp->mesh = mesh;
+	return temp;
 }
 
 GLuint Renderer::loadCubemap(const std::vector<std::string>& faces)

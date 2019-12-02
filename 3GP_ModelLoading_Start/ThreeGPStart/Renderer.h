@@ -13,7 +13,7 @@ struct myMesh
 {
 	GLuint VAO;
 	GLuint texture;
-	Helpers::Mesh mesh;
+	//Helpers::Mesh mesh;
 	unsigned int numElements;
 };
 
@@ -24,16 +24,16 @@ private:
 	GLuint m_program{ 0 };
 
 	// Vertex Array Object to wrap all render settings
-	GLuint m_VAO{ 0 };
+//	GLuint m_VAO{ 0 };
 
 	// Number of elments to use when rendering
-	GLuint m_numElements{ 0 };
+//	GLuint m_numElements{ 0 };
 
 	bool CreateProgram();
 
-	std::vector<myMesh*> meshVector;
-	myMesh* skybox;
-	Skybox* mySkybox;
+	std::vector<myMesh> meshVector;
+	std::vector<myMesh> skyboxVector;
+	//Skybox* mySkybox;
 
 public:
 	Renderer()=default;
@@ -45,8 +45,7 @@ public:
 	// Render the scene
 	void Render(const Helpers::Camera& camera, float deltaTime);
 
-	void GenBuffers(const Helpers::Mesh& mesh, const std::vector<std::string>& texFileName);
-	void GenSkyboxBuff(const Helpers::Mesh& mesh);
+	myMesh GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName);
 	GLuint loadCubemap(const std::vector<std::string>& faces);
 };
 

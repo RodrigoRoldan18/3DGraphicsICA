@@ -13,5 +13,5 @@ void main(void)
 	vec3 tex_coord = texture(sampler_tex, varying_texCoord).rgb;
 
 	vec3 N = normalize(varying_normal);
-	fragment_colour = vec4(tex_coord * N.y, 1.0);
+	fragment_colour = vec4(tex_coord, 1.0);
 }
