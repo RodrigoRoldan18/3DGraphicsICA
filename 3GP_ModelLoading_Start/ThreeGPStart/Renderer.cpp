@@ -7,16 +7,6 @@
 Renderer::~Renderer()
 {
 	glDeleteProgram(m_program);	
-	//glDeleteBuffers(1, &m_VAO);
-	/*for (auto& m : meshVector)
-	{
-		delete m;
-	}
-	for (auto& s : skyboxVector)
-	{
-		delete s;
-	}*/
-	//delete mySkybox;
 }
 
 // Load, compile and link the shaders and create a program object to host them
@@ -61,13 +51,23 @@ bool Renderer::InitialiseGeometry()
 
 	// TODO - load mesh using the Helpers::ModelLoader class
 
-	//mySkybox = new Skybox();
 	Helpers::ModelLoader skyboxLoader;
 	if (!skyboxLoader.LoadFromFile("Data\\Sky\\Clouds\\skybox.x"))
 		return false;
+	std::vector<std::string> faces =
+	{
+		"Data\\Sky\\Clouds\\SkyBox_Top.tga",
+		"Data\\Sky\\Clouds\\SkyBox_Right.tga",
+		"Data\\Sky\\Clouds\\SkyBox_Left.tga",
+		"Data\\Sky\\Clouds\\SkyBox_Front.tga",
+		"Data\\Sky\\Clouds\\SkyBox_Back.tga",
+		"Data\\Sky\\Clouds\\SkyBox_Bottom.tga"
+	};
+	int i = 0;
 	for (const Helpers::Mesh& mesh : skyboxLoader.GetMeshVector())
 	{
-		skyboxVector.push_back(GenBuffers(mesh, "Data\\Sky\\Clouds\\SkyBox_Front.tga"));
+		skyboxVector.push_back(GenBuffers(mesh, faces[i]));
+		i++;
 	}
 
 	Terrain* myTerrain = new Terrain();
@@ -130,9 +130,7 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	glEnable(GL_CULL_FACE);
 
 	// Uncomment to render in wireframe (can be useful when debugging)
-//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glDepthMask(GL_FALSE);
-	glDisable(GL_DEPTH_TEST);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	// Clear buffers from previous frame
 	glClearColor(0.0f, 0.0f, 0.0f, 0.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -162,6 +160,8 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	glUniformMatrix4fv(model_xform_id, 1, GL_FALSE, glm::value_ptr(model_xform));
 
 	//Render the skybox
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
 	for (auto& s : skyboxVector)
 	{
 			glActiveTexture(GL_TEXTURE0);

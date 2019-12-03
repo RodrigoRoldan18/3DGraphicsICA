@@ -23,7 +23,7 @@
     <ProjectGuid>{E894F7DA-0840-41A8-88F6-63F59389D74D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ThreeGPStart</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -169,6 +169,7 @@
     <ClCompile Include="ImageLoader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="Skybox.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="Helper.h" />
     <ClInclude Include="ImageLoader.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Simulation.h" />
     <ClInclude Include="Skybox.h" />

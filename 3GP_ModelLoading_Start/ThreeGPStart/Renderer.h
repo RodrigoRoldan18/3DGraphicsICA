@@ -13,7 +13,6 @@ struct myMesh
 {
 	GLuint VAO;
 	GLuint texture;
-	//Helpers::Mesh mesh;
 	unsigned int numElements;
 };
 
@@ -33,7 +32,6 @@ private:
 
 	std::vector<myMesh> meshVector;
 	std::vector<myMesh> skyboxVector;
-	//Skybox* mySkybox;
 
 public:
 	Renderer()=default;
