@@ -2,17 +2,12 @@
 #include "ExternalLibraryHeaders.h"
 #include "Helper.h"
 #include "Mesh.h"
+#include "Model.h"
 
-class Terrain
+class Terrain : public Model
 {
 private:
-	int numCells, numCellsX, numCellsZ;
-	float sizeX, sizeZ;
 	Helpers::Mesh* myMesh;
-
-	GLuint heightmap;
-	float vertexXtoImage, vertexZtoImage;
-	GLbyte* imageData;
 
 public:
 	Terrain() {};
@@ -20,6 +15,5 @@ public:
 	void CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std::string argHeightmap);
 
 	Helpers::Mesh GetMesh() const { return *myMesh; }
-	GLuint GetHeightmap() const { return heightmap; }
 };
 

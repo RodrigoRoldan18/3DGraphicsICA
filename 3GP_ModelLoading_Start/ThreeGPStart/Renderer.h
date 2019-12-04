@@ -6,15 +6,9 @@
 #include "Mesh.h"
 #include "Camera.h"
 
-class Terrain;
+class Model;
 class Skybox;
-
-struct myMesh
-{
-	GLuint VAO;
-	GLuint texture;
-	unsigned int numElements;
-};
+class Terrain;
 
 class Renderer
 {
@@ -30,8 +24,11 @@ private:
 
 	bool CreateProgram();
 
-	std::vector<myMesh> meshVector;
-	std::vector<myMesh> skyboxVector;
+	std::vector<Model*> modelVector;
+
+	Skybox* tempSkybox;
+	Model* tempModel;
+	Terrain* myTerrain;
 
 public:
 	Renderer()=default;
@@ -42,8 +39,5 @@ public:
 
 	// Render the scene
 	void Render(const Helpers::Camera& camera, float deltaTime);
-
-	myMesh GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName);
-	GLuint loadCubemap(const std::vector<std::string>& faces);
 };
 

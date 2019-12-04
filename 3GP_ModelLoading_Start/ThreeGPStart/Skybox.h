@@ -2,15 +2,12 @@
 #include "ExternalLibraryHeaders.h"
 #include "Helper.h"
 #include "Mesh.h"
+#include "Model.h"
 
-class Skybox
+class Skybox : public Model
 {
-private:
-	std::vector<std::string> faces;
-
 public:
-	Skybox();
-	std::vector<std::string> GetFaces() const { return faces; }
+	void Render(const GLuint& argProgram, glm::mat4& argCombined_xform, const glm::mat4& argProjection_xform, const glm::mat4& argView_xform, GLuint& argCombined_xform_id) override final;
 
 };
 

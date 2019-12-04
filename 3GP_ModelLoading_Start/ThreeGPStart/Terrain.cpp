@@ -3,6 +3,13 @@
 
 void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std::string argHeightmap)
 {
+	int numCells, numCellsX, numCellsZ;
+	float sizeX, sizeZ;
+
+	GLuint heightmap;
+	float vertexXtoImage, vertexZtoImage;
+	GLbyte* imageData;
+
 	numCells = argNumCells;
 	numCellsX = numCells + 1;
 	numCellsZ = numCells + 1;
