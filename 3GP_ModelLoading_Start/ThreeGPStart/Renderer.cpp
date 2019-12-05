@@ -3,6 +3,7 @@
 #include "Terrain.h"
 #include "Skybox.h"
 #include "Model.h"
+#include "Node.h"
 
 // On exit must clean up any OpenGL resources e.g. the program, the buffers
 Renderer::~Renderer()
@@ -12,6 +13,7 @@ Renderer::~Renderer()
 	delete tempModel;
 	delete tempSkybox;
 	delete myTerrain;
+	delete tempAqua;
 }
 
 // Load, compile and link the shaders and create a program object to host them
@@ -88,9 +90,14 @@ bool Renderer::InitialiseGeometry()
 	tempModel = new Model();
 	for (const Helpers::Mesh& mesh : jeepLoader.GetMeshVector())
 	{
-		tempModel->GenBuffers(mesh, "Data\\Models\\Jeep\\jeep_rood.jpg", GL_REPEAT);
+		tempModel->GenBuffers(mesh, "Data\\Models\\Jeep\\jeep_army.jpg", GL_REPEAT);
 	}	
 	modelVector.push_back(tempModel);
+
+	/*Helpers::ModelLoader aquaPigLoader;
+	if (!aquaPigLoader.LoadFromFile("Data\\Models\\AquaPig\\aqua_pig_xforms.txt"))
+		return false;
+	tempAqua = new Model();*/
 	
 	/*if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\gun.obj"))
 		return false;

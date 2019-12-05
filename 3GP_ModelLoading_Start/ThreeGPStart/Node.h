@@ -1,12 +1,11 @@
 #pragma once
 #include "ExternalLibraryHeaders.h"
 
-//class Node
-//{
-//public:
-//	glm::vec3 translation;
-//	glm::vec3 rotation;
-//	std::vector<Node*> children;
-//	size_t meshIndex;
-//	Node* root;
-//};
+class Node
+{
+public:
+	glm::vec3 translation;
+	glm::vec3 rotation;
+	std::vector<Node*> children;
+	size_t meshIndex;
+};

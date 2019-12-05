@@ -29,6 +29,7 @@ private:
 	Skybox* tempSkybox;
 	Model* tempModel;
 	Terrain* myTerrain;
+	Model* tempAqua;
 
 public:
 	Renderer()=default;
