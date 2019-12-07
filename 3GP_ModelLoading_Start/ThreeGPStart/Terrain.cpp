@@ -5,9 +5,6 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 {
 	int numCells, numCellsX, numCellsZ;
 	float sizeX, sizeZ;
-
-	GLuint heightmap;
-	float vertexXtoImage, vertexZtoImage;
 	GLbyte* imageData;
 
 	numCells = argNumCells;
@@ -16,6 +13,8 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 	sizeX = argSizeX;
 	sizeZ = argSizeZ;
 	myMesh = new Helpers::Mesh();
+	glm::vec3 start(-sizeX / 2, 0, sizeZ / 2);
+	float tiles{ 10.0f };
 
 	///Create the vertices
 	///Load the heightmap
@@ -23,22 +22,31 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 	if (!imgLoader.Load(argHeightmap))
 		return;
 
-	vertexXtoImage = (float)imgLoader.Width() / numCellsX;
-	vertexZtoImage = (float)imgLoader.Height() / numCellsZ;
-
+	float vertexXtoImage = (float)imgLoader.Width() / numCellsX;
+	float vertexZtoImage = (float)imgLoader.Height() / numCellsZ;
 	imageData = imgLoader.GetData();
 	for (int cellZ = 0; cellZ < numCellsZ; cellZ++)
 	{
 		for (int cellX = 0; cellX < numCellsX; cellX++)
 		{
-			int imageX = vertexXtoImage * cellX;
-			int imageZ = vertexZtoImage * cellZ;
+			glm::vec3 pos{ start };
+			pos.x += cellX * sizeX;
+			pos.z -= cellZ * sizeZ;		
 
-			size_t offset = ((size_t)imageX + (size_t)imageZ * imgLoader.Width()) * 4;
-			BYTE height = imageData[offset];
-			myMesh->vertices.push_back({ cellX * sizeX, (float)height, -cellZ * sizeZ });
 			///Create the texture coordinates
-			myMesh->uvCoords.push_back({ (float)cellX * sizeX / numCellsX, (float)cellZ * sizeZ / numCellsZ });
+			float u = (float)cellX / numCells;
+			float v = (float)cellZ / numCells;
+
+			int heightMapX = (int)(u * (imgLoader.Width() - 1));
+			int heightMapY = (int)(v * (imgLoader.Height() - 1));
+
+			size_t offset = ((size_t)(vertexXtoImage * cellX) + (size_t)(vertexZtoImage * cellZ) * imgLoader.Width()) * 4;	
+			pos.y = (BYTE)imageData[offset];
+			myMesh->vertices.push_back(pos);
+
+			u *= tiles;
+			v *= tiles;
+			myMesh->uvCoords.push_back(glm::vec2(u, v));
 			///Create the normals
 			myMesh->normals.push_back({ 0.0f, 0.0f, 0.0f });
 		}

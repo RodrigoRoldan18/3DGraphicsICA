@@ -170,8 +170,16 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	GLuint combined_xform_id = glGetUniformLocation(m_program, "combined_xform");
 	glUniformMatrix4fv(combined_xform_id, 1, GL_FALSE, glm::value_ptr(combined_xform));
 
+	//Send the lightPosition to the shader in a uniform
+	GLuint lightPos_id = glGetUniformLocation(m_program, "lightPos");
+	glUniform3fv(lightPos_id, 1, glm::value_ptr(camera.GetPosition()));//glm::vec3(1.2f, 1.0f, 2.0f)));
+
+	//Send the viewPosition to the shader in a uniform
+	GLuint viewPos_id = glGetUniformLocation(m_program, "viewPos");
+	glUniform3fv(viewPos_id, 1, glm::value_ptr(camera.GetPosition()));
+
 	// TODO: render each mesh. Send the correct model matrix to the shader in a uniform
-	glm::mat4 model_xform = glm::mat4(1);
+	glm::mat4 model_xform = glm::mat4(1);	//move this to each model as the glm::translate is applied here <--
 	GLuint model_xform_id = glGetUniformLocation(m_program, "model_xform");
 	glUniformMatrix4fv(model_xform_id, 1, GL_FALSE, glm::value_ptr(model_xform));
 
