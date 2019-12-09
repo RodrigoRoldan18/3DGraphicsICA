@@ -2,6 +2,15 @@
 #include "MyMesh.h"
 #include "ImageLoader.h"
 
+Model::~Model()
+{
+	for (auto& mesh : meshVector)
+	{
+		delete mesh;
+	}
+	delete root;
+}
+
 void Model::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName, const GLint& textureWrappingType)
 {
 	MyMesh* temp = new MyMesh();
@@ -119,4 +128,9 @@ void Model::LoadMaterials(const std::vector<Helpers::Material>& argMaterialVec, 
 		mat.diffuseTextureFilename = argFilePath + mat.diffuseTextureFilename;
 		std::cout << mat.diffuseTextureFilename << std::endl;
 	}
+}
+
+void Model::LoadHierarchy(Helpers::Node* argNode)
+{
+	root = argNode;
 }

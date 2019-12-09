@@ -10,6 +10,10 @@ Renderer::~Renderer()
 {
 	glDeleteProgram(m_program);	
 
+	for (auto& model : modelVector)
+	{
+		delete model;
+	}
 	delete tempModel;
 	delete tempSkybox;
 	delete myTerrain;
@@ -87,44 +91,10 @@ bool Renderer::InitialiseGeometry()
 	/*Helpers::ModelLoader aquaPigLoader;
 	if (!aquaPigLoader.LoadFromFile("Data\\Models\\AquaPig\\aqua_pig_xforms.txt"))
 		return false;
-	tempAqua = new Model();*/
-	
-	/*if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\gun.obj"))
-		return false;
-	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
-	{
-		GenBuffers(mesh, { "Data\\Models\\AquaPig\\aqua_pig_1K.png" });
-	}
-	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\gun_base.obj"))
-		return false;
-	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
-	{
-		GenBuffers(mesh, {"Data\\Models\\AquaPig\\aqua_pig_1K.png"});
-	}
-	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\hull.obj"))
-		return false;
-	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
-	{
-		GenBuffers(mesh, { "Data\\Models\\AquaPig\\aqua_pig_1K.png" });
-	}
-	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\propeller.obj"))
-		return false;
-	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
-	{
-		GenBuffers(mesh, { "Data\\Models\\AquaPig\\aqua_pig_1K.png" });
-	}
-	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\wing_left.obj"))
-		return false;
-	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
-	{
-		GenBuffers(mesh, { "Data\\Models\\AquaPig\\aqua_pig_1K.png" });
-	}
-	if (!modelLoader.LoadFromFile("Data\\Models\\AquaPig\\wing_right.obj"))
-		return false;
-	for (const Helpers::Mesh& mesh : modelLoader.GetMeshVector())
-	{
-		GenBuffers(mesh, { "Data\\Models\\AquaPig\\aqua_pig_1K.png" });
-	}*/
+	tempAqua = new Model();
+	tempAqua->LoadMaterials(aquaPigLoader.GetMaterialVector(), "Data\\Models\\AquaPig\\");
+	tempAqua->LoadHierarchy(aquaPigLoader.GetRootNode());*/
+
 
 	return true;
 }
