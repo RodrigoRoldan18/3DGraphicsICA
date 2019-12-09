@@ -5,6 +5,8 @@ void Skybox::Render(const GLuint& argProgram, glm::mat4& argCombined_xform, cons
 {
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
+	GLint lightFlag_id = glGetUniformLocation(argProgram, "lightFlag");
+	glUniform1i(lightFlag_id, false);
 	for (MyMesh* mesh : meshVector)
 	{
 		glActiveTexture(GL_TEXTURE0);

@@ -13,7 +13,7 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 	sizeX = argSizeX;
 	sizeZ = argSizeZ;
 	myMesh = new Helpers::Mesh();
-	glm::vec3 start(-sizeX / 2, 0, sizeZ / 2);
+	glm::vec3 start(-(argNumCells * sizeX) / 2, 0, (argNumCells * sizeZ) / 2);
 	float tiles{ 10.0f };
 
 	///Create the vertices

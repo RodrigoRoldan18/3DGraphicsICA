@@ -57,25 +57,14 @@ bool Renderer::InitialiseGeometry()
 		return false;
 
 	// TODO - load mesh using the Helpers::ModelLoader class
-
 	Helpers::ModelLoader skyboxLoader;
-	if (!skyboxLoader.LoadFromFile("Data\\Sky\\Clouds\\skybox.x"))
+	if (!skyboxLoader.LoadFromFile("Data\\Sky\\Hills\\skybox.x"))
 		return false;
-	std::vector<std::string> faces =
-	{
-		"Data\\Sky\\Clouds\\SkyBox_Top.tga",
-		"Data\\Sky\\Clouds\\SkyBox_Right.tga",
-		"Data\\Sky\\Clouds\\SkyBox_Left.tga",
-		"Data\\Sky\\Clouds\\SkyBox_Front.tga",
-		"Data\\Sky\\Clouds\\SkyBox_Back.tga",
-		"Data\\Sky\\Clouds\\SkyBox_Bottom.tga"
-	};
-	int i = 0;
 	tempSkybox = new Skybox();
+	tempSkybox->LoadMaterials(skyboxLoader.GetMaterialVector(), "Data\\Sky\\Hills\\");
 	for (const Helpers::Mesh& mesh : skyboxLoader.GetMeshVector())
-	{		
-		tempSkybox->GenBuffers(mesh, faces[i], GL_CLAMP_TO_EDGE);
-		i++;
+	{	
+		tempSkybox->GenBuffers(mesh, tempSkybox->GetMaterialVec()[mesh.materialIndex].diffuseTextureFilename, GL_CLAMP_TO_EDGE);
 	}
 	modelVector.push_back(tempSkybox);
 
@@ -88,9 +77,10 @@ bool Renderer::InitialiseGeometry()
 	if (!jeepLoader.LoadFromFile("Data\\Models\\Jeep\\jeep.obj"))
 		return false;
 	tempModel = new Model();
+	tempModel->LoadMaterials(jeepLoader.GetMaterialVector(), "Data\\Models\\Jeep\\");
 	for (const Helpers::Mesh& mesh : jeepLoader.GetMeshVector())
 	{
-		tempModel->GenBuffers(mesh, "Data\\Models\\Jeep\\jeep_army.jpg", GL_REPEAT);
+		tempModel->GenBuffers(mesh, tempModel->GetMaterialVec()[mesh.materialIndex].diffuseTextureFilename, GL_REPEAT);
 	}	
 	modelVector.push_back(tempModel);
 

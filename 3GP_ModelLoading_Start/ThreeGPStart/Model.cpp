@@ -96,6 +96,8 @@ void Model::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName
 
 void Model::Render(const GLuint& argProgram, glm::mat4& argCombined_xform, const glm::mat4& argProjection_xform, const glm::mat4& argView_xform, GLuint& argCombined_xform_id)
 {
+	GLuint lightFlag_id = glGetUniformLocation(argProgram, "lightFlag");
+	glUniform1i(lightFlag_id, true);
 	for (MyMesh* mesh : meshVector)
 	{
 		glActiveTexture(GL_TEXTURE0);
@@ -106,5 +108,15 @@ void Model::Render(const GLuint& argProgram, glm::mat4& argCombined_xform, const
 		glDrawElements(GL_TRIANGLES, mesh->numElements, GL_UNSIGNED_INT, (void*)0);
 		// Always a good idea, when debugging at least, to check for GL errors
 		Helpers::CheckForGLError();
-	}	
+	}		
+}
+
+void Model::LoadMaterials(const std::vector<Helpers::Material>& argMaterialVec, const std::string& argFilePath)
+{
+	materialVector = argMaterialVec;
+	for (Helpers::Material& mat : materialVector)
+	{
+		mat.diffuseTextureFilename = argFilePath + mat.diffuseTextureFilename;
+		std::cout << mat.diffuseTextureFilename << std::endl;
+	}
 }
