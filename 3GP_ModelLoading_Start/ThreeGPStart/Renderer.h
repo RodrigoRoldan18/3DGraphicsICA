@@ -40,5 +40,7 @@ public:
 
 	// Render the scene
 	void Render(const Helpers::Camera& camera, float deltaTime);
+
+	std::vector<Model*>& GetModelVector() { return modelVector; }
 };
 

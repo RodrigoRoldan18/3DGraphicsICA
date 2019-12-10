@@ -1,5 +1,6 @@
 #include "Simulation.h"
 #include "Renderer.h"
+#include "Model.h"
 
 // Initialise this as well as the renderer, returns false on error
 bool Simulation::Initialise()
@@ -18,7 +19,50 @@ bool Simulation::Initialise()
 bool Simulation::HandleInput(GLFWwindow* window)
 {
 	// You can get keypresses like this:
-	// if (glfwGetKey(window, GLFW_KEY_W)==GLFW_PRESS) // means W key pressed
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) // means W key pressed
+	{
+		for (Model* model : m_renderer->GetModelVector())
+		{
+			if (model->GetName() == "Jeep")
+			{
+				model->GetRoot()->translation.x++;
+				model->UpdateHierarchy();
+			}
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		for (Model* model : m_renderer->GetModelVector())
+		{
+			if (model->GetName() == "Jeep")
+			{
+				model->GetRoot()->translation.z--;
+				model->UpdateHierarchy();
+			}
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+	{
+		for (Model* model : m_renderer->GetModelVector())
+		{
+			if (model->GetName() == "Jeep")
+			{
+				model->GetRoot()->translation.x--;
+				model->UpdateHierarchy();
+			}
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		for (Model* model : m_renderer->GetModelVector())
+		{
+			if (model->GetName() == "Jeep")
+			{
+				model->GetRoot()->translation.z++;
+				model->UpdateHierarchy();
+			}
+		}
+	}
 
 	// You can get mouse button input, returned state is GLFW_PRESS or GLFW_RELEASE
 	// int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);

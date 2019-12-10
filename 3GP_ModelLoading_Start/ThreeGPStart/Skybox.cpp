@@ -5,6 +5,12 @@ void Skybox::Render(const GLuint& argProgram, glm::mat4& argCombined_xform, cons
 {
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
+
+	// TODO: render each mesh. Send the correct model matrix to the shader in a uniform
+	glm::mat4 model_xform = glm::mat4(1);
+	GLuint model_xform_id = glGetUniformLocation(argProgram, "model_xform");
+	glUniformMatrix4fv(model_xform_id, 1, GL_FALSE, glm::value_ptr(model_xform));
+
 	GLint lightFlag_id = glGetUniformLocation(argProgram, "lightFlag");
 	glUniform1i(lightFlag_id, false);
 	for (MyMesh* mesh : meshVector)

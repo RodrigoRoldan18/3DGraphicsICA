@@ -19,7 +19,7 @@ void main(void)
 	if (lightFlag == true)
 	{
 		//ambient
-		vec3 lightColour = vec3(1.0, 1.0, 1.0);
+		vec3 lightColour = vec3(1.0, 0.7, 0.6);
 		float ambientStrength = 0.1;
 		vec3 ambient = ambientStrength * lightColour;
 

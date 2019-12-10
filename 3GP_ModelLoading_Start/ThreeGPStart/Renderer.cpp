@@ -64,7 +64,7 @@ bool Renderer::InitialiseGeometry()
 	Helpers::ModelLoader skyboxLoader;
 	if (!skyboxLoader.LoadFromFile("Data\\Sky\\Hills\\skybox.x"))
 		return false;
-	tempSkybox = new Skybox();
+	tempSkybox = new Skybox("Skybox");
 	tempSkybox->LoadMaterials(skyboxLoader.GetMaterialVector(), "Data\\Sky\\Hills\\");
 	for (const Helpers::Mesh& mesh : skyboxLoader.GetMeshVector())
 	{	
@@ -72,7 +72,7 @@ bool Renderer::InitialiseGeometry()
 	}
 	modelVector.push_back(tempSkybox);
 
-	myTerrain = new Terrain();
+	myTerrain = new Terrain("Terrain");
 	myTerrain->CreateTerrain(256, 10.0f, 10.0f, "Data\\Textures\\curvy.gif");
 	myTerrain->GenBuffers(myTerrain->GetMesh(), "Data\\Textures\\grass11.bmp", GL_REPEAT);
 	modelVector.push_back(myTerrain);
@@ -80,7 +80,7 @@ bool Renderer::InitialiseGeometry()
 	Helpers::ModelLoader jeepLoader;
 	if (!jeepLoader.LoadFromFile("Data\\Models\\Jeep\\jeep.obj"))
 		return false;
-	tempModel = new Model();
+	tempModel = new Model("Jeep");
 	tempModel->LoadMaterials(jeepLoader.GetMaterialVector(), "Data\\Models\\Jeep\\");
 	for (const Helpers::Mesh& mesh : jeepLoader.GetMeshVector())
 	{
@@ -132,16 +132,11 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 
 	//Send the lightPosition to the shader in a uniform
 	GLuint lightPos_id = glGetUniformLocation(m_program, "lightPos");
-	glUniform3fv(lightPos_id, 1, glm::value_ptr(camera.GetPosition()));//glm::vec3(1.2f, 1.0f, 2.0f)));
+	glUniform3fv(lightPos_id, 1, glm::value_ptr(glm::vec3(-800, 600, 1000)));//glm::vec3(1.2f, 1.0f, 2.0f)));
 
 	//Send the viewPosition to the shader in a uniform
 	GLuint viewPos_id = glGetUniformLocation(m_program, "viewPos");
 	glUniform3fv(viewPos_id, 1, glm::value_ptr(camera.GetPosition()));
-
-	// TODO: render each mesh. Send the correct model matrix to the shader in a uniform
-	glm::mat4 model_xform = glm::mat4(1);	//move this to each model as the glm::translate is applied here <--
-	GLuint model_xform_id = glGetUniformLocation(m_program, "model_xform");
-	glUniformMatrix4fv(model_xform_id, 1, GL_FALSE, glm::value_ptr(model_xform));
 
 	for (Model* m : modelVector)
 	{

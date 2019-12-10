@@ -105,6 +105,11 @@ void Model::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName
 
 void Model::Render(const GLuint& argProgram, glm::mat4& argCombined_xform, const glm::mat4& argProjection_xform, const glm::mat4& argView_xform, GLuint& argCombined_xform_id)
 {
+	// TODO: render each mesh. Send the correct model matrix to the shader in a uniform
+	glm::mat4 model_xform = glm::translate(glm::mat4(1), root->translation);
+	GLuint model_xform_id = glGetUniformLocation(argProgram, "model_xform");
+	glUniformMatrix4fv(model_xform_id, 1, GL_FALSE, glm::value_ptr(model_xform));
+
 	GLuint lightFlag_id = glGetUniformLocation(argProgram, "lightFlag");
 	glUniform1i(lightFlag_id, true);
 	for (MyMesh* mesh : meshVector)
@@ -132,5 +137,9 @@ void Model::LoadMaterials(const std::vector<Helpers::Material>& argMaterialVec, 
 
 void Model::LoadHierarchy(Helpers::Node* argNode)
 {
-	root = argNode;
+	//root = argNode;
+}
+
+void Model::UpdateHierarchy()
+{
 }
