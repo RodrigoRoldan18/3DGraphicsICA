@@ -105,15 +105,37 @@ void Model::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName
 
 void Model::Render(const GLuint& argProgram, glm::mat4& argCombined_xform, const glm::mat4& argProjection_xform, const glm::mat4& argView_xform, GLuint& argCombined_xform_id)
 {
-	// TODO: render each mesh. Send the correct model matrix to the shader in a uniform
-	glm::mat4 model_xform = glm::translate(glm::mat4(1), root->translation);
-	GLuint model_xform_id = glGetUniformLocation(argProgram, "model_xform");
-	glUniformMatrix4fv(model_xform_id, 1, GL_FALSE, glm::value_ptr(model_xform));
-
 	GLuint lightFlag_id = glGetUniformLocation(argProgram, "lightFlag");
 	glUniform1i(lightFlag_id, true);
+
+	int meshIndex = 0;
 	for (MyMesh* mesh : meshVector)
 	{
+		// TODO: render each mesh. Send the correct model matrix to the shader in a uniform
+		glm::mat4 model_xform = glm::mat4(1);
+		glm::mat4 translate_xform = glm::mat4(1);
+		glm::mat4 rotate_xform = glm::mat4(1);
+		if(meshIndex == 0) { translate_xform = glm::translate(translate_xform, root->translation); }
+		else if (meshIndex == 5) { translate_xform = glm::translate(translate_xform, root->children.back()->children.front()->translation + root->children.back()->translation); }
+		else
+		{
+			for (Node* node : root->children)
+			{
+				if (node->meshIndex == meshIndex)
+				{
+					translate_xform = glm::translate(translate_xform, node->translation);
+					if (node->rotation.x > 0) { rotate_xform = glm::rotate(rotate_xform, node->rotation.x, node->rotation); }
+					if (node->rotation.y > 0) { rotate_xform = glm::rotate(rotate_xform, node->rotation.y, node->rotation); }
+					if (node->rotation.z > 0) { rotate_xform = glm::rotate(rotate_xform, node->rotation.z, node->rotation); }
+					break;
+				}
+			}
+		}
+		model_xform = translate_xform * rotate_xform;
+		
+		GLuint model_xform_id = glGetUniformLocation(argProgram, "model_xform");
+		glUniformMatrix4fv(model_xform_id, 1, GL_FALSE, glm::value_ptr(model_xform));
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, mesh->texture);
 		glUniform1i(glGetUniformLocation(argProgram, "sampler_tex"), 0);
@@ -122,6 +144,7 @@ void Model::Render(const GLuint& argProgram, glm::mat4& argCombined_xform, const
 		glDrawElements(GL_TRIANGLES, mesh->numElements, GL_UNSIGNED_INT, (void*)0);
 		// Always a good idea, when debugging at least, to check for GL errors
 		Helpers::CheckForGLError();
+		meshIndex++;
 	}		
 }
 
@@ -130,16 +153,55 @@ void Model::LoadMaterials(const std::vector<Helpers::Material>& argMaterialVec, 
 	materialVector = argMaterialVec;
 	for (Helpers::Material& mat : materialVector)
 	{
-		mat.diffuseTextureFilename = argFilePath + mat.diffuseTextureFilename;
-		std::cout << mat.diffuseTextureFilename << std::endl;
+		if (mat.diffuseTextureFilename != "")
+		{
+			mat.diffuseTextureFilename = argFilePath + mat.diffuseTextureFilename;
+			std::cout << mat.diffuseTextureFilename << std::endl;
+		}
+		else
+		{
+			mat.diffuseTextureFilename = argFilePath + "aqua_pig_2K.png";
+			std::cout << mat.diffuseTextureFilename << std::endl;
+		}		
 	}
 }
 
-void Model::LoadHierarchy(Helpers::Node* argNode)
+void Model::LoadHierarchy()
 {
-	//root = argNode;
-}
+	//right_wing
+	Node* rw = new Node();
+	rw->translation = glm::vec3(-2.231, 0.272, -2.663);
+	rw->meshIndex = 1;
+	root->children.push_back(rw);
+	
+	//left_wing
+	Node* lw = new Node();
+	lw->translation = glm::vec3(2.231, 0.272, -2.663);
+	lw->meshIndex = 2;
+	root->children.push_back(lw);
 
-void Model::UpdateHierarchy()
-{
+	//propeller
+	Node* p = new Node();
+	p->translation = glm::vec3(0, 1.395, -3.616);
+	p->rotation = glm::vec3(90, 0, 0);
+	p->meshIndex = 3;
+	root->children.push_back(p);
+
+	//gun_base
+	Node* gb = new Node();
+	gb->translation = glm::vec3(0, 0.569, -1.866);
+	gb->meshIndex = 4;
+	root->children.push_back(gb);
+
+	//gun
+	Node* g = new Node();
+	g->translation = glm::vec3(0, 1.506, 0.644);
+	g->meshIndex = 5;
+	gb->children.push_back(g);
+
+	//delete rw;
+	//delete lw;
+	//delete p;
+	//delete gb;
+	//delete g;
 }

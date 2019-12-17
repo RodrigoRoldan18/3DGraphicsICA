@@ -88,13 +88,27 @@ bool Renderer::InitialiseGeometry()
 	}	
 	modelVector.push_back(tempModel);
 
-	/*Helpers::ModelLoader aquaPigLoader;
-	if (!aquaPigLoader.LoadFromFile("Data\\Models\\AquaPig\\aqua_pig_xforms.txt"))
+	Helpers::ModelLoader aquaPigLoader;
+	tempAqua = new Model("AquaPig");
+	if (!aquaPigLoader.LoadFromFile("Data\\Models\\AquaPig\\hull.obj"))
 		return false;
-	tempAqua = new Model();
+	if (!aquaPigLoader.LoadFromFile("Data\\Models\\AquaPig\\wing_right.obj"))
+		return false;
+	if (!aquaPigLoader.LoadFromFile("Data\\Models\\AquaPig\\wing_left.obj"))
+		return false;
+	if (!aquaPigLoader.LoadFromFile("Data\\Models\\AquaPig\\propeller.obj"))
+		return false;
+	if (!aquaPigLoader.LoadFromFile("Data\\Models\\AquaPig\\gun_base.obj"))
+		return false;
+	if (!aquaPigLoader.LoadFromFile("Data\\Models\\AquaPig\\gun.obj"))
+		return false;
 	tempAqua->LoadMaterials(aquaPigLoader.GetMaterialVector(), "Data\\Models\\AquaPig\\");
-	tempAqua->LoadHierarchy(aquaPigLoader.GetRootNode());*/
-
+	for (const Helpers::Mesh& mesh : aquaPigLoader.GetMeshVector())
+	{
+		tempAqua->GenBuffers(mesh, tempAqua->GetMaterialVec()[mesh.materialIndex].diffuseTextureFilename, GL_REPEAT);
+	}
+	tempAqua->LoadHierarchy();
+	modelVector.push_back(tempAqua);
 
 	return true;
 }
