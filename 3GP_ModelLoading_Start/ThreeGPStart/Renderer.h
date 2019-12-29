@@ -30,6 +30,7 @@ private:
 	Model* tempModel;
 	Terrain* myTerrain;
 	Model* tempAqua;
+	Model* tempLamp;
 
 public:
 	Renderer()=default;

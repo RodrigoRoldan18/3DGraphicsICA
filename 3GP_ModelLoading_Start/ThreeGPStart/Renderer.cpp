@@ -18,6 +18,7 @@ Renderer::~Renderer()
 	delete tempSkybox;
 	delete myTerrain;
 	delete tempAqua;
+	delete tempLamp;
 }
 
 // Load, compile and link the shaders and create a program object to host them
@@ -67,7 +68,7 @@ bool Renderer::InitialiseGeometry()
 	tempSkybox = new Skybox("Skybox");
 	tempSkybox->LoadMaterials(skyboxLoader.GetMaterialVector(), "Data\\Sky\\Hills\\");
 	for (const Helpers::Mesh& mesh : skyboxLoader.GetMeshVector())
-	{	
+	{
 		tempSkybox->GenBuffers(mesh, tempSkybox->GetMaterialVec()[mesh.materialIndex].diffuseTextureFilename, GL_CLAMP_TO_EDGE);
 	}
 	modelVector.push_back(tempSkybox);
@@ -85,11 +86,11 @@ bool Renderer::InitialiseGeometry()
 	for (const Helpers::Mesh& mesh : jeepLoader.GetMeshVector())
 	{
 		tempModel->GenBuffers(mesh, tempModel->GetMaterialVec()[mesh.materialIndex].diffuseTextureFilename, GL_REPEAT);
-	}	
+	}
 	modelVector.push_back(tempModel);
 
 	Helpers::ModelLoader aquaPigLoader;
-	tempAqua = new Model("AquaPig");
+	tempAqua = new Model("AquaPig", {100.0f, 100.0f, 100.0f});
 	if (!aquaPigLoader.LoadFromFile("Data\\Models\\AquaPig\\hull.obj"))
 		return false;
 	if (!aquaPigLoader.LoadFromFile("Data\\Models\\AquaPig\\wing_right.obj"))
@@ -107,8 +108,19 @@ bool Renderer::InitialiseGeometry()
 	{
 		tempAqua->GenBuffers(mesh, tempAqua->GetMaterialVec()[mesh.materialIndex].diffuseTextureFilename, GL_REPEAT);
 	}
-	tempAqua->LoadHierarchy();
+	tempAqua->LoadHierarchy(glm::vec3(800.0f, 100.0f, 0.0f));
 	modelVector.push_back(tempAqua);
+
+	Helpers::ModelLoader lampLoader;
+	tempLamp = new Model("Lamp");
+	if (!lampLoader.LoadFromFile("Data\\Models\\Lamp\\Quad Sphere 3k.obj"))
+		return false;
+	for (const Helpers::Mesh& mesh : lampLoader.GetMeshVector())
+	{
+		tempLamp->GenBuffers(mesh, "Data\\Models\\Lamp\\white.jpg", GL_REPEAT);
+	}
+	tempLamp->LoadHierarchy(glm::vec3(0.0f, 700.0f, 0.0f));
+	modelVector.push_back(tempLamp);
 
 	return true;
 }
@@ -130,7 +142,7 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	GLint viewportSize[4];
 	glGetIntegerv(GL_VIEWPORT, viewportSize);
 	const float aspect_ratio = viewportSize[2] / (float)viewportSize[3];
-	glm::mat4 projection_xform = glm::perspective(glm::radians(45.0f), aspect_ratio, 0.1f, 2000.0f);
+	glm::mat4 projection_xform = glm::perspective(glm::radians(45.0f), aspect_ratio, 1.0f, 2000.0f);
 
 	// TODO: Compute camera view matrix and combine with projection matrix for passing to shader
 	glm::mat4 view_xform = glm::lookAt(camera.GetPosition(), camera.GetPosition() + camera.GetLookVector(), camera.GetUpVector());
@@ -144,16 +156,50 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	GLuint combined_xform_id = glGetUniformLocation(m_program, "combined_xform");
 	glUniformMatrix4fv(combined_xform_id, 1, GL_FALSE, glm::value_ptr(combined_xform));
 
-	//Send the lightPosition to the shader in a uniform
-	GLuint lightPos_id = glGetUniformLocation(m_program, "lightPos");
-	glUniform3fv(lightPos_id, 1, glm::value_ptr(glm::vec3(-800, 600, 1000)));//glm::vec3(1.2f, 1.0f, 2.0f)));
-
 	//Send the viewPosition to the shader in a uniform
 	GLuint viewPos_id = glGetUniformLocation(m_program, "viewPos");
 	glUniform3fv(viewPos_id, 1, glm::value_ptr(camera.GetPosition()));
 
+	//directional light
+	GLuint lightDirection_id = glGetUniformLocation(m_program, "dirLight.direction");
+	glUniform3fv(lightDirection_id, 1, glm::value_ptr(glm::vec3(-0.5f, -0.1f, -0.9f)));
+	GLuint lightAmbient_id = glGetUniformLocation(m_program, "dirLight.ambient");
+	glUniform1f(lightAmbient_id, 0.1f);
+	GLuint lightSpecular_id = glGetUniformLocation(m_program, "dirLight.specular");
+	glUniform1f(lightSpecular_id, 0.5f);
+
 	for (Model* m : modelVector)
 	{
+		if(m->GetName() == "Lamp")
+		{
+			//point light
+			GLuint lightPosition_id = glGetUniformLocation(m_program, "pointLight.position");
+			glUniform3fv(lightPosition_id, 1, glm::value_ptr(m->GetRoot()->translation)); 
+			lightAmbient_id = glGetUniformLocation(m_program, "pointLight.ambient");
+			glUniform1f(lightAmbient_id, 0.1f);
+			lightSpecular_id = glGetUniformLocation(m_program, "pointLight.specular");
+			glUniform1f(lightSpecular_id, 1.0f);
+			GLuint lightRange_id = glGetUniformLocation(m_program, "pointLight.range");
+			glUniform1f(lightRange_id, 0.9f);
+		}
+		if (m->GetName() == "Jeep")
+		{
+			//spotlight
+			GLuint lightPosition_id = glGetUniformLocation(m_program, "spotLight.position");
+			glUniform3fv(lightPosition_id, 1, glm::value_ptr(m->GetRoot()->translation + glm::vec3(315.0f, 180.0f, 75.0f)));
+			lightDirection_id = glGetUniformLocation(m_program, "spotLight.direction");
+			glUniform3fv(lightDirection_id, 1, glm::value_ptr(glm::vec3(1.0f, 0.0f, 0.0f)));
+			GLuint lightCutOff_id = glGetUniformLocation(m_program, "spotLight.cutOff");
+			glUniform1f(lightCutOff_id, glm::cos(glm::radians(12.5f)));
+			GLuint lightOuterCutOff_id = glGetUniformLocation(m_program, "spotLight.outerCutOff");
+			glUniform1f(lightOuterCutOff_id, glm::cos(glm::radians(17.5f)));
+			GLuint lightRange_id = glGetUniformLocation(m_program, "spotLight.range");
+			glUniform1f(lightRange_id, 0.9f);
+			lightAmbient_id = glGetUniformLocation(m_program, "spotLight.ambient");
+			glUniform1f(lightAmbient_id, 0.1f);
+			lightSpecular_id = glGetUniformLocation(m_program, "spotLight.specular");
+			glUniform1f(lightSpecular_id, 1.0f);
+		}
 		m->Render(m_program, combined_xform, projection_xform, view_xform, combined_xform_id);
 	}	
 }

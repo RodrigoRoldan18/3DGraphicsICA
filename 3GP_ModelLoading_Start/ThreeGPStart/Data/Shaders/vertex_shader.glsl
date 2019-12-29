@@ -11,13 +11,14 @@ layout(location = 2) in vec2 vertex_texCoord;
 
 out vec2 varying_texCoord;
 out vec3 varying_normal;
-out vec3 FragPos;
+out vec3 varying_position;
 
 void main(void)
 {	
 	varying_texCoord = vertex_texCoord;
 	varying_normal = mat3(transpose(inverse(model_xform))) * vertex_normal;
-	FragPos = vec3(model_xform * vec4(vertex_position, 1.0));
+
+	varying_position = vec3(model_xform * vec4(vertex_position, 1.0));
 
 	gl_Position = combined_xform * model_xform * vec4(vertex_position, 1.0);
 }

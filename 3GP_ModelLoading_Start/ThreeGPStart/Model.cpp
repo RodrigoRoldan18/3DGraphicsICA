@@ -112,26 +112,31 @@ void Model::Render(const GLuint& argProgram, glm::mat4& argCombined_xform, const
 	for (MyMesh* mesh : meshVector)
 	{
 		// TODO: render each mesh. Send the correct model matrix to the shader in a uniform
-		glm::mat4 model_xform = glm::mat4(1);
-		glm::mat4 translate_xform = glm::mat4(1);
-		glm::mat4 rotate_xform = glm::mat4(1);
-		if(meshIndex == 0) { translate_xform = glm::translate(translate_xform, root->translation); }
-		else if (meshIndex == 5) { translate_xform = glm::translate(translate_xform, root->children.back()->children.front()->translation + root->children.back()->translation); }
+		glm::mat4 model_xform = glm::mat4(1.0f);
+
+		if(meshIndex == 0) { model_xform = glm::translate(model_xform, root->translation); }
+		else if (meshIndex == 5)
+		{
+			model_xform = glm::translate(model_xform, root->children.back()->children.front()->translation + root->children.back()->translation + root->translation); 
+			model_xform = glm::rotate(model_xform, std::min(0.0f,(glm::sin((float)glfwGetTime()))), glm::vec3(1, 0, 0));
+		}
 		else
 		{
 			for (Node* node : root->children)
 			{
 				if (node->meshIndex == meshIndex)
 				{
-					translate_xform = glm::translate(translate_xform, node->translation);
-					if (node->rotation.x > 0) { rotate_xform = glm::rotate(rotate_xform, node->rotation.x, node->rotation); }
-					if (node->rotation.y > 0) { rotate_xform = glm::rotate(rotate_xform, node->rotation.y, node->rotation); }
-					if (node->rotation.z > 0) { rotate_xform = glm::rotate(rotate_xform, node->rotation.z, node->rotation); }
+					model_xform = glm::translate(model_xform, node->translation + root->translation);
+					if (meshIndex == 3)
+					{
+						model_xform = glm::rotate(model_xform, glm::radians(node->rotation.x), node->rotation);
+						model_xform = glm::rotate(model_xform, (float)glfwGetTime() * -5.0f, glm::vec3(0,1,0));
+					}
 					break;
 				}
 			}
 		}
-		model_xform = translate_xform * rotate_xform;
+		model_xform = glm::scale(model_xform, scale);
 		
 		GLuint model_xform_id = glGetUniformLocation(argProgram, "model_xform");
 		glUniformMatrix4fv(model_xform_id, 1, GL_FALSE, glm::value_ptr(model_xform));
@@ -153,55 +158,60 @@ void Model::LoadMaterials(const std::vector<Helpers::Material>& argMaterialVec, 
 	materialVector = argMaterialVec;
 	for (Helpers::Material& mat : materialVector)
 	{
-		if (mat.diffuseTextureFilename != "")
+		if (mat.diffuseTextureFilename != "")	//JEEP
 		{
 			mat.diffuseTextureFilename = argFilePath + mat.diffuseTextureFilename;
-			std::cout << mat.diffuseTextureFilename << std::endl;
 		}
 		else
 		{
 			mat.diffuseTextureFilename = argFilePath + "aqua_pig_2K.png";
-			std::cout << mat.diffuseTextureFilename << std::endl;
 		}		
+		std::cout << mat.diffuseTextureFilename << std::endl;
 	}
 }
 
-void Model::LoadHierarchy()
+void Model::LoadHierarchy(const glm::vec3& argTranslation)
 {
+	//translations have been edited to fit with the scaling
+	//hull
+	root->translation = argTranslation;
+	root->meshIndex = 0;
+
+	if (name != "AquaPig") { return; }
+
 	//right_wing
 	Node* rw = new Node();
-	rw->translation = glm::vec3(-2.231, 0.272, -2.663);
+	rw->translation = glm::vec3(-223.1f, 27.2f, -266.3f);
 	rw->meshIndex = 1;
 	root->children.push_back(rw);
 	
 	//left_wing
 	Node* lw = new Node();
-	lw->translation = glm::vec3(2.231, 0.272, -2.663);
+	lw->translation = glm::vec3(223.1f, 27.2f, -266.3f);
 	lw->meshIndex = 2;
 	root->children.push_back(lw);
 
 	//propeller
 	Node* p = new Node();
-	p->translation = glm::vec3(0, 1.395, -3.616);
-	p->rotation = glm::vec3(90, 0, 0);
+	p->translation = glm::vec3(0.0f, 139.5f, -361.6f);
+	p->rotation = glm::vec3(90.0f, 0.0f, 0.0f);
 	p->meshIndex = 3;
 	root->children.push_back(p);
 
 	//gun_base
 	Node* gb = new Node();
-	gb->translation = glm::vec3(0, 0.569, -1.866);
+	gb->translation = glm::vec3(0.0f, 56.9f, -186.6f);
 	gb->meshIndex = 4;
 	root->children.push_back(gb);
 
 	//gun
 	Node* g = new Node();
-	g->translation = glm::vec3(0, 1.506, 0.644);
+	g->translation = glm::vec3(0.0f, 150.6f, 64.4f);
 	g->meshIndex = 5;
 	gb->children.push_back(g);
+}
 
-	//delete rw;
-	//delete lw;
-	//delete p;
-	//delete gb;
-	//delete g;
+void Model::CreateLightbulb()
+{
+
 }

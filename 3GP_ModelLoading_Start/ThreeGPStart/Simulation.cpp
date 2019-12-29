@@ -63,6 +63,72 @@ bool Simulation::HandleInput(GLFWwindow* window)
 			}
 		}
 	}
+	if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+	{
+		for (Model* model : m_renderer->GetModelVector())
+		{
+			if (model->GetName() == "Lamp")
+			{
+				model->GetRoot()->translation.z-= 5;
+				//model->UpdateHierarchy();
+			}
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+	{
+		for (Model* model : m_renderer->GetModelVector())
+		{
+			if (model->GetName() == "Lamp")
+			{
+				model->GetRoot()->translation.x+= 5;
+				//model->UpdateHierarchy();
+			}
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+	{
+		for (Model* model : m_renderer->GetModelVector())
+		{
+			if (model->GetName() == "Lamp")
+			{
+				model->GetRoot()->translation.z+= 5;
+				//model->UpdateHierarchy();
+			}
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+	{
+		for (Model* model : m_renderer->GetModelVector())
+		{
+			if (model->GetName() == "Lamp")
+			{
+				model->GetRoot()->translation.x-= 5;
+				//model->UpdateHierarchy();
+			}
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+	{
+		for (Model* model : m_renderer->GetModelVector())
+		{
+			if (model->GetName() == "Lamp")
+			{
+				model->GetRoot()->translation.y += 5;
+				//model->UpdateHierarchy();
+			}
+		}
+	}
+	if (glfwGetKey(window, GLFW_KEY_SEMICOLON) == GLFW_PRESS)
+	{
+		for (Model* model : m_renderer->GetModelVector())
+		{
+			if (model->GetName() == "Lamp")
+			{
+				model->GetRoot()->translation.y -= 5;
+				//model->UpdateHierarchy();
+			}
+		}
+	}
 
 	// You can get mouse button input, returned state is GLFW_PRESS or GLFW_RELEASE
 	// int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
