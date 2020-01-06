@@ -14,6 +14,10 @@ public:
 	~Terrain() { delete myMesh; }
 	void CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std::string argHeightmap);
 
+	float Noise(int x, int y);
+	float CosineLerp(float a, float b, float x);
+	float KenPerlin(float xPos, float zPos);
+
 	Helpers::Mesh GetMesh() const { return *myMesh; }
 };
 

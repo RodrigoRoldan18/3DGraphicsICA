@@ -140,36 +140,3 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec
 
 	return ((ambient + diffuse + specular) * tex_colour);
 }
-
-////ambient
-//vec3 lightColour = vec3(1.0, 0.7, 0.6);
-////vec3 light_direction = vec3(-0.5, -0.1, -0.9);	//for directional light(sun)
-////for point lights (lightbulb)		
-//vec3 light_direction = P - lightPos;
-//float ambientStrength = 0.1;	//pass as uniform
-//vec3 ambient = ambientStrength * lightColour;
-//
-////normalisation
-//vec3 N = normalize(varying_normal);
-//vec3 L = normalize(lightPos - P); //for point light
-////vec3 L = normalize(-light_direction); //for directional light
-//
-////specular
-//float specularStrength = 0.5;	//pass as uniform
-//vec3 viewDir = normalize(viewPos - varying_position);
-//vec3 reflectDir = reflect(-L, N);
-//
-//float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-//vec3 specular = specularStrength * spec * lightColour;
-//
-////attenuation
-//float light_range = 0.9f; //pass as uniform
-//float light_distance = distance(lightPos, varying_position);
-//float attenuation = 1.0 - smoothstep(0.0, light_range, light_distance);
-//
-////diffuse
-//float diff = max(0, dot(L, N));
-//vec3 diffuse = diff * lightColour;
-////diffuse = diffuse * attenuation;
-//
-//vec3 result = (ambient + diffuse + specular) * tex_colour;

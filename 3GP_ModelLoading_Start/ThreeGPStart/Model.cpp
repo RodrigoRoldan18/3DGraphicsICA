@@ -4,7 +4,7 @@
 
 Model::~Model()
 {
-	for (auto& mesh : meshVector)
+	for (MyMesh* mesh : meshVector)
 	{
 		delete mesh;
 	}
@@ -39,7 +39,7 @@ void Model::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh.elements.size(), mesh.elements.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	temp->numElements = mesh.elements.size();
+	temp->numElements = (unsigned int)mesh.elements.size();
 
 	glGenVertexArrays(1, &temp->VAO);
 	glBindVertexArray(temp->VAO);

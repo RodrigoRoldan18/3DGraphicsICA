@@ -38,10 +38,13 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 			float v = (float)cellZ / numCells;
 
 			int heightMapX = (int)(u * (imgLoader.Width() - 1));
-			int heightMapY = (int)(v * (imgLoader.Height() - 1));
+			int heightMapY = (int)(v * (imgLoader.Height() - 1));			
 
 			size_t offset = ((size_t)(vertexXtoImage * cellX) + (size_t)(vertexZtoImage * cellZ) * imgLoader.Width()) * 4;	
 			pos.y = (BYTE)imageData[offset];
+
+			pos.y += KenPerlin(pos.x, pos.z);
+
 			myMesh->vertices.push_back(pos);
 
 			u *= tiles;
@@ -49,6 +52,8 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 			myMesh->uvCoords.push_back(glm::vec2(u, v));
 			///Create the normals
 			myMesh->normals.push_back({ 0.0f, 0.0f, 0.0f });
+			
+
 		}
 	}	
 	///Create the terrain elements
@@ -106,4 +111,30 @@ void Terrain::CreateTerrain(int argNumCells, float argSizeX, float argSizeZ, std
 	{
 		glm::normalize(normal);
 	}
+}
+
+float Terrain::Noise(int x, int y)
+{
+	int n = x + y * 57; // 57 is the seed – can be tweaked
+	n = (n >> 13) ^ n;
+	int nn = (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
+	return 1.0f - ((float)nn / 1073741824.0f);
+}
+
+float Terrain::CosineLerp(float a, float b, float x)
+{
+	float ft = x * 3.1415927f;
+	float f = (1.0f - cos(ft)) * 0.5f;
+	return a * (1.0f - f) + b * f;
+}
+
+float Terrain::KenPerlin(float xPos, float zPos)
+{
+	float s = Noise((int)xPos, (int)zPos);
+	float t = Noise((int)xPos + 1, (int)zPos);
+	float u = Noise((int)xPos, (int)zPos + 1);
+	float v = Noise((int)xPos + 1, (int)zPos + 1);
+	float c1 = CosineLerp(s, t, xPos);
+	float c2 = CosineLerp(u, v, xPos);
+	return CosineLerp(c1, c2, zPos);
 }

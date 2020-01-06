@@ -10,7 +10,7 @@ Renderer::~Renderer()
 {
 	glDeleteProgram(m_program);	
 
-	for (auto& model : modelVector)
+	for (Model* model : modelVector)
 	{
 		delete model;
 	}

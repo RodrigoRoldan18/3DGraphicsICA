@@ -9,5 +9,5 @@ public:
 	std::vector<Node*> children;
 	size_t meshIndex;
 
-	~Node() { for (auto& child : children) { delete child; } }
+	~Node() { for (Node* child : children) { delete child; } }
 };
