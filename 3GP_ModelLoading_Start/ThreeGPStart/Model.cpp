@@ -85,6 +85,7 @@ void Model::GenBuffers(const Helpers::Mesh& mesh, const std::string& texFileName
 	// Clear VAO binding
 	glBindVertexArray(0);
 
+	// Load the texture
 	Helpers::ImageLoader imgLoader;
 	if (!imgLoader.Load(texFileName))
 		return;
@@ -111,9 +112,10 @@ void Model::Render(const GLuint& argProgram, glm::mat4& argCombined_xform, const
 	int meshIndex = 0;
 	for (MyMesh* mesh : meshVector)
 	{
-		// TODO: render each mesh. Send the correct model matrix to the shader in a uniform
+		// render each mesh. Send the correct model matrix to the shader in a uniform
 		glm::mat4 model_xform = glm::mat4(1.0f);
 
+		// Apply transformation to the mesh
 		if(meshIndex == 0) { model_xform = glm::translate(model_xform, root->translation); }
 		else if (meshIndex == 5)
 		{
@@ -209,9 +211,4 @@ void Model::LoadHierarchy(const glm::vec3& argTranslation)
 	g->translation = glm::vec3(0.0f, 150.6f, 64.4f);
 	g->meshIndex = 5;
 	gb->children.push_back(g);
-}
-
-void Model::CreateLightbulb()
-{
-
 }

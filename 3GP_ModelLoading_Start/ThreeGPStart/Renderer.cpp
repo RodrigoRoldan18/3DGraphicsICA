@@ -138,13 +138,13 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	glClearColor(0.0f, 0.0f, 0.0f, 0.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// TODO: Compute viewport and projection matrix
+	// Compute viewport and projection matrix
 	GLint viewportSize[4];
 	glGetIntegerv(GL_VIEWPORT, viewportSize);
 	const float aspect_ratio = viewportSize[2] / (float)viewportSize[3];
 	glm::mat4 projection_xform = glm::perspective(glm::radians(45.0f), aspect_ratio, 1.0f, 2000.0f);
 
-	// TODO: Compute camera view matrix and combine with projection matrix for passing to shader
+	// Compute camera view matrix and combine with projection matrix for passing to shader
 	glm::mat4 view_xform = glm::lookAt(camera.GetPosition(), camera.GetPosition() + camera.GetLookVector(), camera.GetUpVector());
 	glm::mat4 view_xform2 = glm::mat4(glm::mat3(view_xform));
 	glm::mat4 combined_xform = projection_xform * view_xform2;
@@ -152,7 +152,7 @@ void Renderer::Render(const Helpers::Camera& camera, float deltaTime)
 	// Use our program. Doing this enables the shaders we attached previously.
 	glUseProgram(m_program);
 	
-	// TODO: Send the combined matrix to the shader in a uniform
+	// Send the combined matrix to the shader in a uniform
 	GLuint combined_xform_id = glGetUniformLocation(m_program, "combined_xform");
 	glUniformMatrix4fv(combined_xform_id, 1, GL_FALSE, glm::value_ptr(combined_xform));
 

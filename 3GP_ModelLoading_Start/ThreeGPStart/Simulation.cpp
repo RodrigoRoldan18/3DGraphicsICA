@@ -26,7 +26,6 @@ bool Simulation::HandleInput(GLFWwindow* window)
 			if (model->GetName() == "Jeep")
 			{
 				model->GetRoot()->translation.x++;
-				//model->UpdateHierarchy();
 			}
 		}
 	}
@@ -37,7 +36,6 @@ bool Simulation::HandleInput(GLFWwindow* window)
 			if (model->GetName() == "Jeep")
 			{
 				model->GetRoot()->translation.z--;
-				//model->UpdateHierarchy();
 			}
 		}
 	}
@@ -48,7 +46,6 @@ bool Simulation::HandleInput(GLFWwindow* window)
 			if (model->GetName() == "Jeep")
 			{
 				model->GetRoot()->translation.x--;
-				//model->UpdateHierarchy();
 			}
 		}
 	}
@@ -59,7 +56,6 @@ bool Simulation::HandleInput(GLFWwindow* window)
 			if (model->GetName() == "Jeep")
 			{
 				model->GetRoot()->translation.z++;
-				//model->UpdateHierarchy();
 			}
 		}
 	}
@@ -70,7 +66,6 @@ bool Simulation::HandleInput(GLFWwindow* window)
 			if (model->GetName() == "Lamp")
 			{
 				model->GetRoot()->translation.z-= 5;
-				//model->UpdateHierarchy();
 			}
 		}
 	}
@@ -81,7 +76,6 @@ bool Simulation::HandleInput(GLFWwindow* window)
 			if (model->GetName() == "Lamp")
 			{
 				model->GetRoot()->translation.x+= 5;
-				//model->UpdateHierarchy();
 			}
 		}
 	}
@@ -92,7 +86,6 @@ bool Simulation::HandleInput(GLFWwindow* window)
 			if (model->GetName() == "Lamp")
 			{
 				model->GetRoot()->translation.z+= 5;
-				//model->UpdateHierarchy();
 			}
 		}
 	}
@@ -103,7 +96,6 @@ bool Simulation::HandleInput(GLFWwindow* window)
 			if (model->GetName() == "Lamp")
 			{
 				model->GetRoot()->translation.x-= 5;
-				//model->UpdateHierarchy();
 			}
 		}
 	}
@@ -114,7 +106,6 @@ bool Simulation::HandleInput(GLFWwindow* window)
 			if (model->GetName() == "Lamp")
 			{
 				model->GetRoot()->translation.y += 5;
-				//model->UpdateHierarchy();
 			}
 		}
 	}
@@ -125,7 +116,6 @@ bool Simulation::HandleInput(GLFWwindow* window)
 			if (model->GetName() == "Lamp")
 			{
 				model->GetRoot()->translation.y -= 5;
-				//model->UpdateHierarchy();
 			}
 		}
 	}
